@@ -281,7 +281,7 @@ function handleSearch() {
 
 .results-area {
   padding: 1.5rem 1.25rem;
-  max-width: 860px;
+  max-width: 1200px;
   margin: 0 auto;
 }
 
@@ -307,9 +307,9 @@ function handleSearch() {
 }
 
 .cards-grid {
-  display: flex;
-  flex-direction: column;
-  gap: 14px;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
 }
 
 .card {
@@ -317,6 +317,7 @@ function handleSearch() {
   border: 1px solid #eee;
   border-radius: 14px;
   display: flex;
+  flex-direction: column;
   overflow: hidden;
   cursor: pointer;
   transition: border-color 0.2s, box-shadow 0.2s;
@@ -329,8 +330,8 @@ function handleSearch() {
 
 .card-image {
   position: relative;
-  width: 140px;
-  min-width: 140px;
+  width: 100%;
+  height: 160px;
   overflow: hidden;
 }
 
@@ -338,6 +339,11 @@ function handleSearch() {
   width: 100%;
   height: 100%;
   object-fit: cover;
+  transition: transform 0.3s;
+}
+
+.card:hover .card-image img {
+  transform: scale(1.05);
 }
 
 .card-rank {
@@ -354,7 +360,7 @@ function handleSearch() {
 
 .card-body {
   flex: 1;
-  padding: 1rem 1.25rem;
+  padding: 0.85rem 1rem;
 }
 
 .card-top {
@@ -365,7 +371,7 @@ function handleSearch() {
 }
 
 .card-name {
-  font-size: 15px;
+  font-size: 14px;
   font-weight: 500;
   color: #1a1a2e;
 }
@@ -378,23 +384,24 @@ function handleSearch() {
 }
 
 .card-reviews {
-  font-size: 12px;
+  font-size: 11px;
   color: #aaa;
-  margin-bottom: 6px;
+  margin-bottom: 5px;
 }
 
 .card-address {
-  font-size: 13px;
+  font-size: 12px;
   color: #666;
-  margin-bottom: 6px;
+  margin-bottom: 5px;
+  line-height: 1.4;
 }
 
 .card-coords {
-  font-size: 11px;
+  font-size: 10px;
   color: #999;
   font-family: monospace;
   background: #f5f5f5;
-  padding: 3px 8px;
+  padding: 2px 7px;
   border-radius: 4px;
   display: inline-block;
   margin-bottom: 8px;
@@ -403,21 +410,21 @@ function handleSearch() {
 .card-tags {
   display: flex;
   flex-wrap: wrap;
-  gap: 5px;
+  gap: 4px;
   align-items: center;
 }
 
 .card-tag {
-  font-size: 11px;
-  padding: 2px 9px;
+  font-size: 10px;
+  padding: 2px 7px;
   border-radius: 4px;
   background: #faf0ed;
   color: #993C1D;
 }
 
 .card-open {
-  font-size: 11px;
-  padding: 2px 9px;
+  font-size: 10px;
+  padding: 2px 7px;
   border-radius: 4px;
   font-weight: 500;
 }
@@ -430,5 +437,21 @@ function handleSearch() {
 .card-open.closed {
   background: #faeaea;
   color: #a32d2d;
+}
+
+@media (max-width: 1024px) {
+  .cards-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 600px) {
+  .cards-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .hero-title {
+    font-size: 1.8rem;
+  }
 }
 </style>
