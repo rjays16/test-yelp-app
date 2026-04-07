@@ -5,21 +5,20 @@
       <path d="m21 21-4.35-4.35"/>
     </svg>
     <input
-      v-model="searchText"
+      v-model="city"
       class="search-input"
       type="text"
       placeholder="Enter a city name..."
-      @input="handleInput"
-      @keydown.enter="handleEnter"
+      @keydown.enter="handleSearch"
     />
-    <button class="search-btn" @click="handleEnter" :disabled="loading || !searchText.trim()">
+    <button class="search-btn" @click="handleSearch" :disabled="loading || !city.trim()">
       {{ loading ? 'Searching...' : 'Search' }}
     </button>
   </div>
 </template>
 
 <script setup>
-import { ref, watch } from 'vue'
+import { ref } from 'vue'
 
 const props = defineProps({
   loading: Boolean,
@@ -27,26 +26,12 @@ const props = defineProps({
 
 const emit = defineEmits(['search'])
 
-const searchText = ref('')
-let debounceTimer = null
+const city = ref('')
 
-function handleInput() {
-  if (debounceTimer) clearTimeout(debounceTimer)
-  
-  debounceTimer = setTimeout(() => {
-    if (searchText.value.trim()) {
-      emit('search', searchText.value)
-      searchText.value = ''
-    }
-  }, 500)
-}
-
-function handleEnter() {
-  if (debounceTimer) clearTimeout(debounceTimer)
-  if (searchText.value.trim()) {
-    emit('search', searchText.value)
-    searchText.value = ''
-  }
+function handleSearch() {
+  if (!city.value.trim()) return
+  emit('search', city.value)
+  city.value = ''
 }
 </script>
 

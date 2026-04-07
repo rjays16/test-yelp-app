@@ -25,16 +25,21 @@ export function useYelp() {
       )
       const data = await response.json()
 
-      if (data.error) {
-        error.value = data.error.description || 'Something went wrong'
-        return
+if (data.error) {
+      const errorMsg = data.error.description || data.error.error || 'Something went wrong'
+      if (errorMsg.includes('Could not execute search') || errorMsg.includes('location')) {
+        error.value = 'City not found. Please try a more specific city name.'
+      } else {
+        error.value = errorMsg
       }
+      return
+    }
 
-      restaurants.value = data.businesses || []
+    restaurants.value = data.businesses || []
 
-      if (restaurants.value.length === 0) {
-        error.value = 'No restaurants found. Try another city!'
-      }
+    if (restaurants.value.length === 0) {
+      error.value = 'No restaurants found. Try another city!'
+    }
     } catch (err) {
       error.value = 'Failed to fetch restaurants. Please try again.'
     } finally {
