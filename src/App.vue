@@ -390,6 +390,22 @@ onMounted(() => {
   .hero-title { font-size: 2rem; }
   .hero-stats { gap: 1.5rem; }
   .stat-value { font-size: 1.5rem; }
+  .pagination {
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+  .page-btn {
+    padding: 8px 14px;
+    font-size: 12px;
+  }
+  .page-numbers {
+    gap: 4px;
+  }
+  .page-num {
+    width: 32px;
+    height: 32px;
+    font-size: 12px;
+  }
 }
 </style>
 
