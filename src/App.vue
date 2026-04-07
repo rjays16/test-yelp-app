@@ -100,7 +100,7 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { ref, onMounted } from 'vue'
 
 const city = ref('')
 const searchedCity = ref('')
@@ -109,27 +109,24 @@ const error = ref(null)
 
 const restaurants = ref([])
 
-function formatAddress(location) {
-  return location?.display_address?.join(', ') || 'Address not available'
-}
+const defaultCities = ['San Francisco', 'New York', 'Los Angeles', 'Chicago', 'Miami', 'Seattle', 'Austin', 'Boston', 'Denver', 'Portland']
 
-function handleImageError(e) {
-  e.target.src = 'https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=300&h=200&fit=crop'
-}
+onMounted(() => {
+  const randomCity = defaultCities[Math.floor(Math.random() * defaultCities.length)]
+  searchedCity.value = randomCity
+  fetchRestaurants(randomCity)
+})
 
-async function handleSearch() {
-  if (!city.value.trim()) return
-
+async function fetchRestaurants(cityName) {
   loading.value = true
   error.value = null
-  searchedCity.value = city.value
 
   try {
     const API_KEY = 'vetG740Hv4K0q4dEn7EdyYpo3wUaBK8X0pflSLru89Go19FdAB5ggG84qwJJwaM-5UrLVhnHY_iNKY9FSGc97PUaZPYHa3NVvDFpTx953w3qtjIEOQy5WuCuUSfUaXYx'
     const CORS_PROXY = 'https://corsproxy.io/?'
     
     const response = await fetch(
-      CORS_PROXY + encodeURIComponent(`https://api.yelp.com/v3/businesses/search?term=restaurants&location=${encodeURIComponent(city.value)}&limit=8`),
+      CORS_PROXY + encodeURIComponent(`https://api.yelp.com/v3/businesses/search?term=restaurants&location=${encodeURIComponent(cityName)}&limit=8`),
       {
         headers: {
           Authorization: `Bearer ${API_KEY}`,
@@ -153,6 +150,20 @@ async function handleSearch() {
   } finally {
     loading.value = false
   }
+}
+
+async function handleSearch() {
+  if (!city.value.trim()) return
+  searchedCity.value = city.value
+  fetchRestaurants(city.value)
+}
+
+function formatAddress(location) {
+  return location?.display_address?.join(', ') || 'Address not available'
+}
+
+function handleImageError(e) {
+  e.target.src = 'https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=300&h=200&fit=crop'
 }
 </script>
 
