@@ -28,7 +28,7 @@
     </header>
 
     <main class="results-area">
-      <LoadingState v-if="loading" />
+      <SkeletonGrid v-if="loading" />
 
       <ErrorState v-else-if="error" :message="error" @retry="retrySearch" />
 
@@ -95,6 +95,7 @@ import SearchBar from './components/SearchBar.vue'
 import RestaurantCard from './components/RestaurantCard.vue'
 import RestaurantGrid from './components/RestaurantGrid.vue'
 import LoadingState from './components/LoadingState.vue'
+import SkeletonGrid from './components/SkeletonGrid.vue'
 import ErrorState from './components/ErrorState.vue'
 import EmptyState from './components/EmptyState.vue'
 import Footer from './components/Footer.vue'
@@ -399,6 +400,7 @@ onMounted(() => {
   --hero-start: #1a1a2e;
   --hero-mid: #16213e;
   --hero-end: #0f3460;
+  --skeleton-highlight: #e8e8e8;
 }
 
 .dark {
@@ -411,5 +413,6 @@ onMounted(() => {
   --hero-start: #0a0a14;
   --hero-mid: #0f0f1a;
   --hero-end: #1a1a2e;
+  --skeleton-highlight: #252540;
 }
 </style>
