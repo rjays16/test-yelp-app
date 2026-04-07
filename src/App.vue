@@ -1,94 +1,112 @@
 <template>
   <div class="app">
     <header class="hero">
-      <p class="hero-label">Powered by Yelp</p>
-      <h1 class="hero-title">Find <span>Restaurants</span><br />Near Any City</h1>
-      <p class="hero-sub">Real reviews, real ratings, real results</p>
+      <div class="hero-content">
+        <p class="hero-label">Restaurant Finder</p>
+        <h1 class="hero-title">Discover Best<br /><span>Restaurants</span></h1>
+        <p class="hero-sub">Real Yelp data for real food lovers</p>
 
-      <div class="search-bar">
-        <input
-          v-model="city"
-          class="search-input"
-          type="text"
-          placeholder="Enter a city (e.g. New York, Chicago...)"
-          @keydown.enter="handleSearch"
-        />
-        <button class="search-btn" @click="handleSearch" :disabled="loading">
-          {{ loading ? 'Searching...' : 'Search' }}
-        </button>
+        <div class="search-bar">
+          <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="11" cy="11" r="8"/>
+            <path d="m21 21-4.35-4.35"/>
+          </svg>
+          <input
+            v-model="city"
+            class="search-input"
+            type="text"
+            placeholder="Enter a city name..."
+            @keydown.enter="handleSearch"
+          />
+          <button class="search-btn" @click="handleSearch" :disabled="loading">
+            {{ loading ? 'Searching...' : 'Search' }}
+          </button>
+        </div>
       </div>
 
-      <div class="stats-row">
+      <div class="hero-stats">
         <div class="stat">
-          <div class="stat-num">8</div>
-          <div class="stat-label">Results</div>
+          <span class="stat-value">{{ restaurants.length }}</span>
+          <span class="stat-label">Restaurants</span>
         </div>
         <div class="stat">
-          <div class="stat-num">Real</div>
-          <div class="stat-label">Yelp Data</div>
+          <span class="stat-value">5 mi</span>
+          <span class="stat-label">Radius</span>
         </div>
         <div class="stat">
-          <div class="stat-num">5mi</div>
-          <div class="stat-label">Radius</div>
+          <span class="stat-value">Yelp</span>
+          <span class="stat-label">Data Source</span>
         </div>
       </div>
     </header>
 
     <main class="results-area">
-      <!-- Loading State -->
       <div v-if="loading" class="loading-state">
-        <div class="spinner"></div>
-        <p>Finding restaurants in {{ city }}...</p>
+        <div class="loader"></div>
+        <p>Finding best restaurants in {{ city }}...</p>
       </div>
 
-      <!-- Error State -->
       <div v-else-if="error" class="error-state">
-        <p>⚠️ {{ error }}</p>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="12" cy="12" r="10"/>
+          <path d="M12 8v4M12 16h.01"/>
+        </svg>
+        <p>{{ error }}</p>
         <button @click="handleSearch" class="retry-btn">Try Again</button>
       </div>
 
-      <!-- Empty State -->
       <div v-else-if="restaurants.length === 0" class="empty-state">
-        <div class="empty-icon">🍽️</div>
+        <div class="empty-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+            <path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+          </svg>
+        </div>
         <h3>Ready to explore?</h3>
-        <p>Enter a city above to find restaurants</p>
+        <p>Enter a city name above to discover restaurants</p>
       </div>
 
-      <!-- Results -->
       <div v-else>
         <div class="results-header">
           <div class="results-title">
-            Restaurants in <strong>{{ searchedCity }}</strong>
+            <span class="city-name">{{ searchedCity }}</span>
+            <span class="results-count">{{ restaurants.length }} places found</span>
           </div>
-          <span class="results-count">{{ restaurants.length }} results</span>
         </div>
 
         <div class="cards-grid">
           <div v-for="(r, index) in restaurants" :key="r.id" class="card">
             <div class="card-image">
               <img
-                :src="r.image_url || 'https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=300&h=200&fit=crop'"
+                :src="r.image_url || 'https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=600&h=400&fit=crop'"
                 :alt="r.name"
                 @error="handleImageError"
               />
-              <span class="card-rank">#{{ index + 1 }}</span>
+              <div class="card-overlay">
+                <span class="card-price">{{ r.price || '$' }}</span>
+                <span class="card-rank">#{{ index + 1 }}</span>
+              </div>
+              <span class="card-status" :class="r.is_closed ? 'closed' : 'open'">
+                {{ r.is_closed ? 'Closed' : 'Open Now' }}
+              </span>
             </div>
             <div class="card-body">
-              <div class="card-top">
-                <span class="card-name">{{ r.name }}</span>
-                <span class="card-rating">★ {{ r.rating }}</span>
+              <h3 class="card-name">{{ r.name }}</h3>
+              <div class="card-rating">
+                <div class="stars">
+                  <span v-for="n in 5" :key="n" :class="{ filled: n <= Math.round(r.rating) }">★</span>
+                </div>
+                <span class="rating-text">{{ r.rating }} ({{ r.review_count }})</span>
               </div>
-              <div class="card-reviews">{{ r.review_count }} reviews</div>
-              <div class="card-address">📍 {{ formatAddress(r.location) }}</div>
-              <span class="card-coords">
-                {{ r.coordinates?.latitude?.toFixed(4) }}, {{ r.coordinates?.longitude?.toFixed(4) }}
-              </span>
+              <div class="card-address">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/>
+                  <circle cx="12" cy="10" r="3"/>
+                </svg>
+                <span>{{ formatAddress(r.location) }}</span>
+              </div>
               <div class="card-tags">
-                <span v-for="cat in r.categories?.slice(0, 2)" :key="cat.alias" class="card-tag">
+                <span v-for="cat in r.categories?.slice(0, 2)" :key="cat.alias" class="tag">
                   {{ cat.title }}
-                </span>
-                <span class="card-open" :class="r.is_closed ? 'closed' : 'open'">
-                  {{ r.is_closed ? '● Closed' : '● Open' }}
                 </span>
               </div>
             </div>
@@ -96,6 +114,10 @@
         </div>
       </div>
     </main>
+
+    <footer class="footer">
+      <p>Powered by <strong>Yelp API</strong></p>
+    </footer>
   </div>
 </template>
 
@@ -106,7 +128,6 @@ const city = ref('')
 const searchedCity = ref('')
 const loading = ref(false)
 const error = ref(null)
-
 const restaurants = ref([])
 
 const defaultCities = ['San Francisco', 'New York', 'Los Angeles', 'Chicago', 'Miami', 'Seattle', 'Austin', 'Boston', 'Denver', 'Portland']
@@ -122,14 +143,11 @@ async function fetchRestaurants(cityName) {
   error.value = null
 
   try {
-    const API_KEY = 'vetG740Hv4K0q4dEn7EdyYpo3wUaBK8X0pflSLru89Go19FdAB5ggG84qwJJwaM-5UrLVhnHY_iNKY9FSGc97PUaZPYHa3NVvDFpTx953w3qtjIEOQy5WuCuUSfUaXYx'
-    const CORS_PROXY = 'https://corsproxy.io/?'
-    
     const response = await fetch(
-      CORS_PROXY + encodeURIComponent(`https://api.yelp.com/v3/businesses/search?term=restaurants&location=${encodeURIComponent(cityName)}&limit=8`),
+      import.meta.env.VITE_CORS_PROXY + encodeURIComponent(`https://api.yelp.com/v3/businesses/search?term=restaurants&location=${encodeURIComponent(cityName)}&limit=8`),
       {
         headers: {
-          Authorization: `Bearer ${API_KEY}`,
+          Authorization: `Bearer ${import.meta.env.VITE_YELP_API_KEY}`,
         },
       }
     )
@@ -143,7 +161,7 @@ async function fetchRestaurants(cityName) {
     restaurants.value = data.businesses || []
 
     if (restaurants.value.length === 0) {
-      error.value = 'No restaurants found for this city. Try another city!'
+      error.value = 'No restaurants found. Try another city!'
     }
   } catch (err) {
     error.value = 'Failed to fetch restaurants. Please try again.'
@@ -159,77 +177,116 @@ async function handleSearch() {
 }
 
 function formatAddress(location) {
-  return location?.display_address?.join(', ') || 'Address not available'
+  return location?.display_address?.slice(0, 2).join(', ') || 'Address not available'
 }
 
 function handleImageError(e) {
-  e.target.src = 'https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=300&h=200&fit=crop'
+  e.target.src = 'https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=600&h=400&fit=crop'
 }
 </script>
 
 <style scoped>
-@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;600&family=DM+Sans:wght@400;500&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:wght@600;700&display=swap');
 
 * { box-sizing: border-box; margin: 0; padding: 0; }
 
 .app {
-  font-family: 'DM Sans', sans-serif;
+  font-family: 'Inter', sans-serif;
   min-height: 100vh;
-  background: #f5f4f0;
+  background: #fafafa;
 }
 
 .hero {
-  background: #1a1a2e;
-  padding: 3rem 2rem 2.5rem;
+  background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+  padding: 4rem 2rem 3rem;
   text-align: center;
+  position: relative;
+  overflow: hidden;
+}
+
+.hero::before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: radial-gradient(circle, rgba(216, 90, 48, 0.1) 0%, transparent 50%);
+  animation: pulse 8s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { transform: scale(1); opacity: 0.5; }
+  50% { transform: scale(1.1); opacity: 0.8; }
+}
+
+.hero-content {
+  position: relative;
+  z-index: 1;
+  max-width: 600px;
+  margin: 0 auto;
 }
 
 .hero-label {
-  font-size: 11px;
-  font-weight: 500;
-  letter-spacing: 2.5px;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 3px;
   text-transform: uppercase;
   color: #D85A30;
-  margin-bottom: 0.75rem;
+  margin-bottom: 1rem;
 }
 
 .hero-title {
   font-family: 'Playfair Display', serif;
-  font-size: 2.4rem;
-  font-weight: 600;
+  font-size: 3.5rem;
+  font-weight: 700;
   color: #fff;
-  line-height: 1.2;
-  margin-bottom: 0.5rem;
+  line-height: 1.1;
+  margin-bottom: 1rem;
 }
 
-.hero-title span { color: #D85A30; }
+.hero-title span {
+  color: #D85A30;
+  display: inline-block;
+}
 
 .hero-sub {
-  font-size: 14px;
-  color: rgba(255,255,255,0.5);
-  margin-bottom: 2rem;
+  font-size: 1.1rem;
+  color: rgba(255, 255, 255, 0.6);
+  margin-bottom: 2.5rem;
 }
 
 .search-bar {
   display: flex;
+  align-items: center;
   max-width: 520px;
   margin: 0 auto;
   background: #fff;
-  border-radius: 50px;
-  overflow: hidden;
-  border: 2px solid transparent;
-  transition: border-color 0.2s;
+  border-radius: 60px;
+  padding: 6px 6px 6px 20px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+  transition: transform 0.3s, box-shadow 0.3s;
 }
 
-.search-bar:focus-within { border-color: #D85A30; }
+.search-bar:focus-within {
+  transform: translateY(-2px);
+  box-shadow: 0 15px 50px rgba(0, 0, 0, 0.3);
+}
+
+.search-icon {
+  width: 20px;
+  height: 20px;
+  color: #999;
+  flex-shrink: 0;
+}
 
 .search-input {
   flex: 1;
   border: none;
   outline: none;
-  font-family: 'DM Sans', sans-serif;
+  font-family: 'Inter', sans-serif;
   font-size: 15px;
-  padding: 0.85rem 1.25rem;
+  padding: 10px 15px;
   background: transparent;
   color: #1a1a2e;
 }
@@ -239,130 +296,179 @@ function handleImageError(e) {
 .search-btn {
   background: #D85A30;
   border: none;
-  padding: 0 1.5rem;
+  padding: 12px 28px;
   color: #fff;
-  font-family: 'DM Sans', sans-serif;
+  font-family: 'Inter', sans-serif;
   font-size: 14px;
-  font-weight: 500;
+  font-weight: 600;
+  border-radius: 50px;
   cursor: pointer;
-  border-radius: 0 50px 50px 0;
-  transition: background 0.2s;
+  transition: background 0.2s, transform 0.2s;
   white-space: nowrap;
 }
 
-.search-btn:hover { background: #c04d25; }
-.search-btn:disabled { background: #aaa; cursor: not-allowed; }
-
-.stats-row {
-  display: flex;
-  justify-content: center;
-  gap: 2.5rem;
-  margin-top: 1.75rem;
+.search-btn:hover {
+  background: #c04d25;
+  transform: scale(1.02);
 }
 
-.stat-num {
+.search-btn:disabled {
+  background: #ccc;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.hero-stats {
+  display: flex;
+  justify-content: center;
+  gap: 3rem;
+  margin-top: 3rem;
+  position: relative;
+  z-index: 1;
+}
+
+.stat {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.stat-value {
   font-family: 'Playfair Display', serif;
-  font-size: 1.4rem;
-  font-weight: 600;
+  font-size: 2rem;
+  font-weight: 700;
   color: #fff;
 }
 
 .stat-label {
-  font-size: 11px;
-  color: rgba(255,255,255,0.4);
-  letter-spacing: 1px;
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.5);
   text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-top: 4px;
 }
 
 .results-area {
-  padding: 1.5rem 1.25rem;
-  max-width: 1200px;
+  padding: 3rem 2rem;
+  max-width: 1280px;
   margin: 0 auto;
+  min-height: 400px;
 }
 
-.loading-state {
+.loading-state, .error-state, .empty-state {
   text-align: center;
-  padding: 4rem 1rem;
+  padding: 5rem 1rem;
 }
 
-.spinner {
-  width: 40px;
-  height: 40px;
+.loader {
+  width: 50px;
+  height: 50px;
   border: 3px solid #eee;
   border-top-color: #D85A30;
   border-radius: 50%;
   animation: spin 0.8s linear infinite;
-  margin: 0 auto 1rem;
+  margin: 0 auto 1.5rem;
 }
 
 @keyframes spin {
   to { transform: rotate(360deg); }
 }
 
-.error-state {
-  text-align: center;
-  padding: 4rem 1rem;
-  color: #a32d2d;
+.loading-state p {
+  color: #666;
+  font-size: 1rem;
+}
+
+.error-state svg {
+  width: 48px;
+  height: 48px;
+  color: #e74c3c;
+  margin-bottom: 1rem;
+}
+
+.error-state p {
+  color: #e74c3c;
+  margin-bottom: 1.5rem;
 }
 
 .retry-btn {
-  margin-top: 1rem;
   background: #D85A30;
   color: #fff;
   border: none;
-  padding: 0.6rem 1.5rem;
+  padding: 12px 32px;
   border-radius: 50px;
   cursor: pointer;
   font-size: 14px;
+  font-weight: 500;
+  transition: background 0.2s;
+}
+
+.retry-btn:hover { background: #c04d25; }
+
+.empty-icon svg {
+  width: 64px;
+  height: 64px;
+  color: #ddd;
+  margin-bottom: 1.5rem;
+}
+
+.empty-state h3 {
+  font-size: 1.5rem;
+  color: #1a1a2e;
+  margin-bottom: 0.5rem;
+}
+
+.empty-state p {
+  color: #888;
 }
 
 .results-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 1.25rem;
+  margin-bottom: 2rem;
 }
 
 .results-title {
-  font-size: 15px;
-  font-weight: 500;
-  color: #333;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.city-name {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.8rem;
+  font-weight: 700;
+  color: #1a1a2e;
 }
 
 .results-count {
-  font-size: 12px;
-  color: #999;
-  background: #eee;
-  padding: 3px 10px;
+  font-size: 14px;
+  color: #888;
+  background: #f0f0f0;
+  padding: 6px 14px;
   border-radius: 20px;
 }
 
 .cards-grid {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
-  gap: 16px;
+  gap: 24px;
 }
 
 .card {
   background: #fff;
-  border: 1px solid #eee;
-  border-radius: 14px;
-  display: flex;
-  flex-direction: column;
+  border-radius: 20px;
   overflow: hidden;
-  cursor: pointer;
-  transition: border-color 0.2s, box-shadow 0.2s;
+  box-shadow: 0 2px 20px rgba(0, 0, 0, 0.06);
+  transition: transform 0.3s, box-shadow 0.3s;
 }
 
 .card:hover {
-  border-color: #D85A30;
-  box-shadow: 0 4px 20px rgba(216, 90, 48, 0.1);
+  transform: translateY(-8px);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.12);
 }
 
 .card-image {
   position: relative;
-  width: 100%;
-  height: 160px;
+  height: 200px;
   overflow: hidden;
 }
 
@@ -370,123 +476,157 @@ function handleImageError(e) {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  transition: transform 0.3s;
+  transition: transform 0.5s;
 }
 
-.card:hover .card-image img { transform: scale(1.05); }
+.card:hover .card-image img {
+  transform: scale(1.08);
+}
+
+.card-overlay {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  right: 12px;
+  display: flex;
+  justify-content: space-between;
+}
+
+.card-price {
+  background: rgba(0, 0, 0, 0.7);
+  color: #fff;
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 13px;
+  font-weight: 600;
+}
 
 .card-rank {
-  position: absolute;
-  top: 8px;
-  left: 8px;
-  background: #1a1a2e;
+  background: #D85A30;
   color: #fff;
-  font-size: 11px;
-  font-weight: 500;
-  padding: 3px 8px;
+  padding: 4px 12px;
   border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.card-status {
+  position: absolute;
+  bottom: 12px;
+  right: 12px;
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.card-status.open {
+  background: rgba(46, 204, 113, 0.9);
+  color: #fff;
+}
+
+.card-status.closed {
+  background: rgba(231, 76, 60, 0.9);
+  color: #fff;
 }
 
 .card-body {
-  flex: 1;
-  padding: 0.85rem 1rem;
-}
-
-.card-top {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  margin-bottom: 2px;
+  padding: 1.25rem;
 }
 
 .card-name {
-  font-size: 14px;
-  font-weight: 500;
+  font-size: 1.1rem;
+  font-weight: 600;
   color: #1a1a2e;
+  margin-bottom: 8px;
+  line-height: 1.3;
 }
 
 .card-rating {
-  font-size: 13px;
-  font-weight: 500;
-  color: #D85A30;
-  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 12px;
 }
 
-.card-reviews {
-  font-size: 11px;
-  color: #aaa;
-  margin-bottom: 5px;
+.stars {
+  display: flex;
+  gap: 2px;
+}
+
+.stars span {
+  color: #ddd;
+  font-size: 14px;
+}
+
+.stars span.filled {
+  color: #f39c12;
+}
+
+.rating-text {
+  font-size: 13px;
+  color: #666;
 }
 
 .card-address {
-  font-size: 12px;
-  color: #666;
-  margin-bottom: 5px;
-  line-height: 1.4;
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+  margin-bottom: 12px;
 }
 
-.card-coords {
-  font-size: 10px;
+.card-address svg {
+  width: 16px;
+  height: 16px;
   color: #999;
-  font-family: monospace;
-  background: #f5f5f5;
-  padding: 2px 7px;
-  border-radius: 4px;
-  display: inline-block;
-  margin-bottom: 8px;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.card-address span {
+  font-size: 13px;
+  color: #666;
+  line-height: 1.4;
 }
 
 .card-tags {
   display: flex;
   flex-wrap: wrap;
-  gap: 4px;
-  align-items: center;
+  gap: 6px;
 }
 
-.card-tag {
-  font-size: 10px;
-  padding: 2px 7px;
-  border-radius: 4px;
-  background: #faf0ed;
-  color: #993C1D;
-}
-
-.card-open {
-  font-size: 10px;
-  padding: 2px 7px;
-  border-radius: 4px;
+.tag {
+  font-size: 11px;
+  padding: 4px 10px;
+  border-radius: 20px;
+  background: #f5f5f5;
+  color: #555;
   font-weight: 500;
 }
 
-.card-open.open { background: #edfaf0; color: #1a7a3c; }
-.card-open.closed { background: #faeaea; color: #a32d2d; }
+.footer {
+  text-align: center;
+  padding: 2rem;
+  color: #999;
+  font-size: 14px;
+}
+
+.footer strong {
+  color: #D85A30;
+}
 
 @media (max-width: 1024px) {
   .cards-grid { grid-template-columns: repeat(2, 1fr); }
+  .hero-title { font-size: 2.5rem; }
 }
 
 @media (max-width: 600px) {
   .cards-grid { grid-template-columns: 1fr; }
-  .hero-title { font-size: 1.8rem; }
-}
-
-.empty-state {
-  text-align: center;
-  padding: 4rem 1rem;
-}
-
-.empty-icon {
-  font-size: 3rem;
-  margin-bottom: 1rem;
-}
-
-.empty-state h3 {
-  font-size: 1.2rem;
-  color: #1a1a2e;
-  margin-bottom: 0.5rem;
-}
-
-.empty-state p {
-  color: #888;
+  .hero { padding: 3rem 1.5rem 2rem; }
+  .hero-title { font-size: 2rem; }
+  .hero-stats { gap: 1.5rem; }
+  .stat-value { font-size: 1.5rem; }
+  .search-bar { padding: 4px 4px 4px 16px; }
+  .search-btn { padding: 10px 20px; }
 }
 </style>
