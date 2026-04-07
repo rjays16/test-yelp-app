@@ -10,36 +10,44 @@ export function useYelp() {
 
   const defaultCities = ['San Francisco', 'New York', 'Los Angeles', 'Chicago', 'Miami', 'Seattle', 'Austin', 'Boston', 'Denver', 'Portland']
 
-  async function fetchRestaurants(cityName) {
+async function fetchRestaurants(cityName) {
     loading.value = true
     error.value = null
 
     try {
-      const response = await fetch(
-        import.meta.env.VITE_CORS_PROXY + encodeURIComponent(`${API_URL}?term=restaurants&location=${encodeURIComponent(cityName)}&limit=50`),
-        {
-          headers: {
-            Authorization: `Bearer ${import.meta.env.VITE_YELP_API_KEY}`,
-          },
-        }
-      )
-      const data = await response.json()
+      let data
 
-if (data.error) {
-      const errorMsg = data.error.description || data.error.error || 'Something went wrong'
-      if (errorMsg.includes('Could not execute search') || errorMsg.includes('location')) {
-        error.value = 'City not found. Please try a more specific city name.'
+      if (import.meta.env.DEV) {
+        const response = await fetch(
+          import.meta.env.VITE_CORS_PROXY + encodeURIComponent(`${API_URL}?term=restaurants&location=${encodeURIComponent(cityName)}&limit=50`),
+          {
+            headers: {
+              Authorization: `Bearer ${import.meta.env.VITE_YELP_API_KEY}`,
+            },
+          }
+        )
+        const proxied = await response.json()
+        data = proxied.contents ? JSON.parse(proxied.contents) : proxied
       } else {
-        error.value = errorMsg
+        const response = await fetch(`/api/yelp?city=${encodeURIComponent(cityName)}`)
+        data = await response.json()
       }
-      return
-    }
 
-    restaurants.value = data.businesses || []
+      if (data.error) {
+        const errorMsg = data.error.description || data.error.error || 'Something went wrong'
+        if (errorMsg.includes('Could not execute search') || errorMsg.includes('location')) {
+          error.value = 'City not found. Please try a more specific city name.'
+        } else {
+          error.value = errorMsg
+        }
+        return
+      }
 
-    if (restaurants.value.length === 0) {
-      error.value = 'No restaurants found. Try another city!'
-    }
+      restaurants.value = data.businesses || []
+
+      if (restaurants.value.length === 0) {
+        error.value = 'No restaurants found. Try another city!'
+      }
     } catch (err) {
       error.value = 'Failed to fetch restaurants. Please try again.'
     } finally {
