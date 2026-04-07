@@ -14,8 +14,8 @@
 .loader {
   width: 50px;
   height: 50px;
-  border: 3px solid #eee;
-  border-top-color: #D85A30;
+  border: 3px solid var(--border-color);
+  border-top-color: var(--accent);
   border-radius: 50%;
   animation: spin 0.8s linear infinite;
   margin: 0 auto 1.5rem;
@@ -26,7 +26,7 @@
 }
 
 .loading-state p {
-  color: #666;
+  color: var(--text-secondary);
   font-size: 1rem;
 }
 </style>

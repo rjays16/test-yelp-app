@@ -85,7 +85,7 @@ function close() {
 .modal-overlay {
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.6);
+  background: rgba(0, 0, 0, 0.7);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -100,7 +100,7 @@ function close() {
 }
 
 .modal-content {
-  background: #fff;
+  background: var(--card-bg);
   border-radius: 20px;
   max-width: 600px;
   width: 100%;
@@ -108,6 +108,7 @@ function close() {
   overflow-y: auto;
   position: relative;
   animation: slideUp 0.3s ease;
+  border: 1px solid var(--border-color);
 }
 
 @keyframes slideUp {
@@ -123,7 +124,7 @@ function close() {
   height: 36px;
   border-radius: 50%;
   border: none;
-  background: rgba(255, 255, 255, 0.9);
+  background: var(--bg-secondary);
   cursor: pointer;
   display: flex;
   align-items: center;
@@ -133,13 +134,17 @@ function close() {
 }
 
 .close-btn:hover {
-  background: #fff;
+  background: var(--accent);
+}
+
+.close-btn:hover svg {
+  color: #fff;
 }
 
 .close-btn svg {
   width: 20px;
   height: 20px;
-  color: #333;
+  color: var(--text-primary);
 }
 
 .modal-header {
@@ -159,7 +164,7 @@ function close() {
 .modal-info h2 {
   font-size: 1.5rem;
   font-weight: 700;
-  color: #1a1a2e;
+  color: var(--text-primary);
   margin-bottom: 0.75rem;
 }
 
@@ -181,13 +186,13 @@ function close() {
 
 .rating-text {
   font-size: 14px;
-  color: #666;
+  color: var(--text-secondary);
   margin-left: 8px;
 }
 
 .modal-address {
   font-size: 14px;
-  color: #666;
+  color: var(--text-secondary);
   margin-bottom: 0.75rem;
   line-height: 1.5;
 }
@@ -201,13 +206,13 @@ function close() {
 }
 
 .modal-status.open {
-  background: #edfaf0;
-  color: #1a7a3c;
+  background: rgba(46, 204, 113, 0.2);
+  color: #27ae60;
 }
 
 .modal-status.closed {
-  background: #faeaea;
-  color: #a32d2d;
+  background: rgba(231, 76, 60, 0.2);
+  color: #e74c3c;
 }
 
 .modal-map {
@@ -224,10 +229,10 @@ function close() {
 
 .category-tag {
   padding: 6px 14px;
-  background: #f5f5f5;
+  background: var(--bg-secondary);
   border-radius: 20px;
   font-size: 13px;
-  color: #555;
+  color: var(--text-primary);
 }
 
 .modal-footer {
@@ -241,7 +246,7 @@ function close() {
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  background: #D85A30;
+  background: var(--accent);
   color: #fff;
   padding: 12px 24px;
   border-radius: 30px;
@@ -263,6 +268,6 @@ function close() {
 .modal-price {
   font-size: 1.25rem;
   font-weight: 700;
-  color: #1a1a2e;
+  color: var(--text-primary);
 }
 </style>

@@ -8,7 +8,9 @@
 .footer {
   text-align: center;
   padding: 2rem;
-  color: #999;
+  color: var(--text-secondary);
   font-size: 14px;
+  border-top: 1px solid var(--border-color);
+  margin-top: 2rem;
 }
 </style>

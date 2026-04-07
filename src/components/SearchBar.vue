@@ -5,20 +5,21 @@
       <path d="m21 21-4.35-4.35"/>
     </svg>
     <input
-      v-model="city"
+      v-model="searchText"
       class="search-input"
       type="text"
       placeholder="Enter a city name..."
-      @keydown.enter="handleSearch"
+      @input="handleInput"
+      @keydown.enter="handleEnter"
     />
-    <button class="search-btn" @click="handleSearch" :disabled="loading">
+    <button class="search-btn" @click="handleEnter" :disabled="loading || !searchText.trim()">
       {{ loading ? 'Searching...' : 'Search' }}
     </button>
   </div>
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { ref, watch } from 'vue'
 
 const props = defineProps({
   loading: Boolean,
@@ -26,12 +27,26 @@ const props = defineProps({
 
 const emit = defineEmits(['search'])
 
-const city = ref('')
+const searchText = ref('')
+let debounceTimer = null
 
-function handleSearch() {
-  if (!city.value.trim()) return
-  emit('search', city.value)
-  city.value = ''
+function handleInput() {
+  if (debounceTimer) clearTimeout(debounceTimer)
+  
+  debounceTimer = setTimeout(() => {
+    if (searchText.value.trim()) {
+      emit('search', searchText.value)
+      searchText.value = ''
+    }
+  }, 500)
+}
+
+function handleEnter() {
+  if (debounceTimer) clearTimeout(debounceTimer)
+  if (searchText.value.trim()) {
+    emit('search', searchText.value)
+    searchText.value = ''
+  }
 }
 </script>
 
@@ -74,7 +89,7 @@ function handleSearch() {
 .search-input::placeholder { color: #aaa; }
 
 .search-btn {
-  background: #D85A30;
+  background: var(--accent);
   border: none;
   padding: 12px 28px;
   color: #fff;
@@ -87,7 +102,7 @@ function handleSearch() {
   white-space: nowrap;
 }
 
-.search-btn:hover {
+.search-btn:hover:not(:disabled) {
   background: #c04d25;
   transform: scale(1.02);
 }

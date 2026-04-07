@@ -19,17 +19,18 @@
 .empty-icon svg {
   width: 64px;
   height: 64px;
-  color: #ddd;
+  color: var(--text-secondary);
   margin-bottom: 1.5rem;
+  opacity: 0.5;
 }
 
 .empty-state h3 {
   font-size: 1.5rem;
-  color: #1a1a2e;
+  color: var(--text-primary);
   margin-bottom: 0.5rem;
 }
 
 .empty-state p {
-  color: #888;
+  color: var(--text-secondary);
 }
 </style>

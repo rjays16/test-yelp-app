@@ -1,12 +1,14 @@
 <template>
   <div class="app">
+    <ThemeToggle />
+
     <header class="hero">
       <div class="hero-content">
         <p class="hero-label">Restaurant Finder</p>
         <h1 class="hero-title">Discover Best<br /><span>Restaurants</span></h1>
         <p class="hero-sub">Real Yelp data for real food lovers</p>
 
-        <SearchBar :loading="loading" @search="searchCity" />
+        <SearchBar :loading="loading" @search="handleCitySearch" />
       </div>
 
       <div class="hero-stats">
@@ -87,6 +89,8 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue'
 import { useYelp } from './composables/useYelp'
+import { useTheme } from './composables/useTheme'
+import ThemeToggle from './components/ThemeToggle.vue'
 import SearchBar from './components/SearchBar.vue'
 import RestaurantCard from './components/RestaurantCard.vue'
 import RestaurantGrid from './components/RestaurantGrid.vue'
@@ -95,6 +99,8 @@ import ErrorState from './components/ErrorState.vue'
 import EmptyState from './components/EmptyState.vue'
 import Footer from './components/Footer.vue'
 import RestaurantModal from './components/RestaurantModal.vue'
+
+useTheme().init()
 
 const ITEMS_PER_PAGE = 8
 
@@ -164,7 +170,8 @@ function retrySearch() {
   }
 }
 
-function handleSearch(city) {
+function handleCitySearch(city) {
+  if (!city?.trim()) return
   lastSearchedCity = city
   currentPage.value = 1
   searchCity(city)
@@ -179,11 +186,13 @@ onMounted(() => {
 .app {
   font-family: 'Inter', sans-serif;
   min-height: 100vh;
-  background: #fafafa;
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  transition: background 0.3s, color 0.3s;
 }
 
 .hero {
-  background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+  background: linear-gradient(135deg, var(--hero-start) 0%, var(--hero-mid) 50%, var(--hero-end) 100%);
   padding: 4rem 2rem 3rem;
   text-align: center;
   position: relative;
@@ -218,7 +227,7 @@ onMounted(() => {
   font-weight: 600;
   letter-spacing: 3px;
   text-transform: uppercase;
-  color: #D85A30;
+  color: var(--accent);
   margin-bottom: 1rem;
 }
 
@@ -226,19 +235,19 @@ onMounted(() => {
   font-family: 'Playfair Display', serif;
   font-size: 3.5rem;
   font-weight: 700;
-  color: #fff;
+  color: var(--text-light);
   line-height: 1.1;
   margin-bottom: 1rem;
 }
 
 .hero-title span {
-  color: #D85A30;
+  color: var(--accent);
   display: inline-block;
 }
 
 .hero-sub {
   font-size: 1.1rem;
-  color: rgba(255, 255, 255, 0.6);
+  color: var(--text-light-secondary);
   margin-bottom: 2.5rem;
 }
 
@@ -261,12 +270,12 @@ onMounted(() => {
   font-family: 'Playfair Display', serif;
   font-size: 2rem;
   font-weight: 700;
-  color: #fff;
+  color: var(--text-light);
 }
 
 .stat-label {
   font-size: 12px;
-  color: rgba(255, 255, 255, 0.5);
+  color: var(--text-light-secondary);
   text-transform: uppercase;
   letter-spacing: 1px;
   margin-top: 4px;
@@ -293,13 +302,13 @@ onMounted(() => {
   font-family: 'Playfair Display', serif;
   font-size: 1.8rem;
   font-weight: 700;
-  color: #1a1a2e;
+  color: var(--text-primary);
 }
 
 .results-count {
   font-size: 14px;
-  color: #888;
-  background: #f0f0f0;
+  color: var(--text-secondary);
+  background: var(--bg-secondary);
   padding: 6px 14px;
   border-radius: 20px;
 }
@@ -313,20 +322,20 @@ onMounted(() => {
 }
 
 .page-btn {
-  background: #fff;
-  border: 1px solid #ddd;
+  background: var(--card-bg);
+  border: 1px solid var(--border-color);
   padding: 10px 20px;
   border-radius: 30px;
   cursor: pointer;
   font-size: 14px;
   font-weight: 500;
-  color: #555;
+  color: var(--text-primary);
   transition: all 0.2s;
 }
 
 .page-btn:hover:not(:disabled) {
-  background: #D85A30;
-  border-color: #D85A30;
+  background: var(--accent);
+  border-color: var(--accent);
   color: #fff;
 }
 
@@ -344,23 +353,23 @@ onMounted(() => {
   width: 40px;
   height: 40px;
   border-radius: 50%;
-  border: 1px solid #ddd;
-  background: #fff;
+  border: 1px solid var(--border-color);
+  background: var(--card-bg);
   cursor: pointer;
   font-size: 14px;
   font-weight: 500;
-  color: #555;
+  color: var(--text-primary);
   transition: all 0.2s;
 }
 
 .page-num:hover {
-  border-color: #D85A30;
-  color: #D85A30;
+  border-color: var(--accent);
+  color: var(--accent);
 }
 
 .page-num.active {
-  background: #D85A30;
-  border-color: #D85A30;
+  background: var(--accent);
+  border-color: var(--accent);
   color: #fff;
 }
 
@@ -376,4 +385,31 @@ onMounted(() => {
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:wght@600;700&display=swap');
 
 * { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg-primary: #fafafa;
+  --bg-secondary: #f0f0f0;
+  --card-bg: #fff;
+  --text-primary: #1a1a2e;
+  --text-secondary: #888;
+  --text-light: #fff;
+  --text-light-secondary: rgba(255, 255, 255, 0.6);
+  --accent: #D85A30;
+  --border-color: #ddd;
+  --hero-start: #1a1a2e;
+  --hero-mid: #16213e;
+  --hero-end: #0f3460;
+}
+
+.dark {
+  --bg-primary: #0f0f1a;
+  --bg-secondary: #1a1a2e;
+  --card-bg: #1a1a2e;
+  --text-primary: #f0f0f0;
+  --text-secondary: #888;
+  --border-color: #333;
+  --hero-start: #0a0a14;
+  --hero-mid: #0f0f1a;
+  --hero-end: #1a1a2e;
+}
 </style>

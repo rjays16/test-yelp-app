@@ -36,7 +36,7 @@ defineEmits(['retry'])
 }
 
 .retry-btn {
-  background: #D85A30;
+  background: var(--accent);
   color: #fff;
   border: none;
   padding: 12px 32px;

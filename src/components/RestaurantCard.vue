@@ -59,17 +59,18 @@ function handleImageError(e) {
 
 <style scoped>
 .card {
-  background: #fff;
+  background: var(--card-bg);
   border-radius: 20px;
   overflow: hidden;
-  box-shadow: 0 2px 20px rgba(0, 0, 0, 0.06);
+  box-shadow: 0 2px 20px rgba(0, 0, 0, 0.08);
   transition: transform 0.3s, box-shadow 0.3s;
   cursor: pointer;
+  border: 1px solid var(--border-color);
 }
 
 .card:hover {
   transform: translateY(-8px);
-  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.12);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
 }
 
 .card-image {
@@ -108,7 +109,7 @@ function handleImageError(e) {
 }
 
 .card-rank {
-  background: #D85A30;
+  background: var(--accent);
   color: #fff;
   padding: 4px 12px;
   border-radius: 20px;
@@ -143,7 +144,7 @@ function handleImageError(e) {
 .card-name {
   font-size: 1.1rem;
   font-weight: 600;
-  color: #1a1a2e;
+  color: var(--text-primary);
   margin-bottom: 8px;
   line-height: 1.3;
 }
@@ -171,7 +172,7 @@ function handleImageError(e) {
 
 .rating-text {
   font-size: 13px;
-  color: #666;
+  color: var(--text-secondary);
 }
 
 .card-address {
@@ -184,14 +185,14 @@ function handleImageError(e) {
 .card-address svg {
   width: 16px;
   height: 16px;
-  color: #999;
+  color: var(--text-secondary);
   flex-shrink: 0;
   margin-top: 2px;
 }
 
 .card-address span {
   font-size: 13px;
-  color: #666;
+  color: var(--text-secondary);
   line-height: 1.4;
 }
 
@@ -205,8 +206,8 @@ function handleImageError(e) {
   font-size: 11px;
   padding: 4px 10px;
   border-radius: 20px;
-  background: #f5f5f5;
-  color: #555;
+  background: var(--bg-secondary);
+  color: var(--text-primary);
   font-weight: 500;
 }
 </style>
