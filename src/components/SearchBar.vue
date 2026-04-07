@@ -99,7 +99,31 @@ function handleSearch() {
 }
 
 @media (max-width: 600px) {
-  .search-bar { padding: 4px 4px 4px 16px; }
-  .search-btn { padding: 10px 20px; }
+  .search-bar { 
+    padding: 4px 4px 4px 16px;
+    flex-wrap: wrap;
+    border-radius: 20px;
+  }
+  .search-input {
+    min-width: 0;
+    font-size: 14px;
+    padding: 8px 10px;
+  }
+  .search-btn { 
+    padding: 10px 16px; 
+    font-size: 13px;
+  }
+}
+
+@media (max-width: 400px) {
+  .search-bar {
+    padding: 6px;
+  }
+  .search-btn {
+    width: 100%;
+    margin-top: 8px;
+    padding: 12px;
+    border-radius: 30px;
+  }
 }
 </style>
