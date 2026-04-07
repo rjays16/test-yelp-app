@@ -13,12 +13,14 @@
           placeholder="Enter a city (e.g. New York, Chicago...)"
           @keydown.enter="handleSearch"
         />
-        <button class="search-btn" @click="handleSearch">Search</button>
+        <button class="search-btn" @click="handleSearch" :disabled="loading">
+          {{ loading ? 'Searching...' : 'Search' }}
+        </button>
       </div>
 
       <div class="stats-row">
         <div class="stat">
-          <div class="stat-num">20+</div>
+          <div class="stat-num">8</div>
           <div class="stat-label">Results</div>
         </div>
         <div class="stat">
@@ -33,33 +35,62 @@
     </header>
 
     <main class="results-area">
-      <div class="results-header">
-        <div class="results-title">
-          <span v-if="searched">Restaurants in <strong>{{ searchedCity }}</strong></span>
-          <span v-else>🔥 Popular Restaurants</span>
-        </div>
-        <span class="results-count">{{ restaurants.length }} results</span>
+      <!-- Loading State -->
+      <div v-if="loading" class="loading-state">
+        <div class="spinner"></div>
+        <p>Finding restaurants in {{ city }}...</p>
       </div>
 
-      <div class="cards-grid">
-        <div v-for="(r, index) in restaurants" :key="r.id" class="card">
-          <div class="card-image">
-            <img :src="r.image" :alt="r.name" />
-            <span class="card-rank">#{{ index + 1 }}</span>
+      <!-- Error State -->
+      <div v-else-if="error" class="error-state">
+        <p>⚠️ {{ error }}</p>
+        <button @click="handleSearch" class="retry-btn">Try Again</button>
+      </div>
+
+      <!-- Empty State -->
+      <div v-else-if="restaurants.length === 0" class="empty-state">
+        <div class="empty-icon">🍽️</div>
+        <h3>Ready to explore?</h3>
+        <p>Enter a city above to find restaurants</p>
+      </div>
+
+      <!-- Results -->
+      <div v-else>
+        <div class="results-header">
+          <div class="results-title">
+            Restaurants in <strong>{{ searchedCity }}</strong>
           </div>
-          <div class="card-body">
-            <div class="card-top">
-              <span class="card-name">{{ r.name }}</span>
-              <span class="card-rating">★ {{ r.rating }}</span>
+          <span class="results-count">{{ restaurants.length }} results</span>
+        </div>
+
+        <div class="cards-grid">
+          <div v-for="(r, index) in restaurants" :key="r.id" class="card">
+            <div class="card-image">
+              <img
+                :src="r.image_url || 'https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=300&h=200&fit=crop'"
+                :alt="r.name"
+                @error="handleImageError"
+              />
+              <span class="card-rank">#{{ index + 1 }}</span>
             </div>
-            <div class="card-reviews">{{ r.reviews }} reviews</div>
-            <div class="card-address">📍 {{ r.address }}</div>
-            <span class="card-coords">{{ r.coords }}</span>
-            <div class="card-tags">
-              <span v-for="tag in r.tags" :key="tag" class="card-tag">{{ tag }}</span>
-              <span class="card-open" :class="r.open ? 'open' : 'closed'">
-                {{ r.open ? '● Open' : '● Closed' }}
+            <div class="card-body">
+              <div class="card-top">
+                <span class="card-name">{{ r.name }}</span>
+                <span class="card-rating">★ {{ r.rating }}</span>
+              </div>
+              <div class="card-reviews">{{ r.review_count }} reviews</div>
+              <div class="card-address">📍 {{ formatAddress(r.location) }}</div>
+              <span class="card-coords">
+                {{ r.coordinates?.latitude?.toFixed(4) }}, {{ r.coordinates?.longitude?.toFixed(4) }}
               </span>
+              <div class="card-tags">
+                <span v-for="cat in r.categories?.slice(0, 2)" :key="cat.alias" class="card-tag">
+                  {{ cat.title }}
+                </span>
+                <span class="card-open" :class="r.is_closed ? 'closed' : 'open'">
+                  {{ r.is_closed ? '● Closed' : '● Open' }}
+                </span>
+              </div>
             </div>
           </div>
         </div>
@@ -73,103 +104,55 @@ import { ref } from 'vue'
 
 const city = ref('')
 const searchedCity = ref('')
-const searched = ref(false)
+const loading = ref(false)
+const error = ref(null)
 
-const restaurants = ref([
-  {
-    id: 1,
-    name: 'The Golden Fork',
-    rating: 4.7,
-    reviews: 320,
-    address: '123 Market St, San Francisco, CA',
-    coords: '37.7749, -122.4194',
-    tags: ['American', 'Brunch'],
-    open: true,
-    image: 'https://images.unsplash.com/photo-1550547660-d9450f859349?w=300&h=200&fit=crop'
-  },
-  {
-    id: 2,
-    name: 'Sakura Ramen House',
-    rating: 4.5,
-    reviews: 215,
-    address: '456 Fillmore St, San Francisco, CA',
-    coords: '37.7751, -122.4320',
-    tags: ['Japanese', 'Ramen'],
-    open: true,
-    image: 'https://images.unsplash.com/photo-1569718212165-3a8278d5f624?w=300&h=200&fit=crop'
-  },
-  {
-    id: 3,
-    name: 'Trattoria Bella',
-    rating: 4.8,
-    reviews: 498,
-    address: '789 Columbus Ave, San Francisco, CA',
-    coords: '37.7998, -122.4078',
-    tags: ['Italian', 'Pizza'],
-    open: false,
-    image: 'https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=300&h=200&fit=crop'
-  },
-  {
-    id: 4,
-    name: 'La Cocina Tacos',
-    rating: 4.4,
-    reviews: 180,
-    address: '321 Mission St, San Francisco, CA',
-    coords: '37.7853, -122.3984',
-    tags: ['Mexican', 'Tacos'],
-    open: true,
-    image: 'https://images.unsplash.com/photo-1565299585323-38d6b0865b47?w=300&h=200&fit=crop'
-  },
-  {
-    id: 5,
-    name: 'Harbor View Seafood',
-    rating: 4.6,
-    reviews: 374,
-    address: '1 Ferry Building, San Francisco, CA',
-    coords: '37.7955, -122.3937',
-    tags: ['Seafood', 'Fine Dining'],
-    open: true,
-    image: 'https://images.unsplash.com/photo-1559339352-11d035aa65de?w=300&h=200&fit=crop'
-  },
-  {
-    id: 6,
-    name: 'Burger & Barrels',
-    rating: 4.3,
-    reviews: 142,
-    address: '88 Haight St, San Francisco, CA',
-    coords: '37.7724, -122.4298',
-    tags: ['Burgers', 'American'],
-    open: true,
-    image: 'https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=300&h=200&fit=crop'
-  },
-  {
-    id: 7,
-    name: 'Spice Garden Indian',
-    rating: 4.5,
-    reviews: 267,
-    address: '202 Valencia St, San Francisco, CA',
-    coords: '37.7686, -122.4218',
-    tags: ['Indian', 'Curry'],
-    open: false,
-    image: 'https://images.unsplash.com/photo-1585937421612-70a008356fbe?w=300&h=200&fit=crop'
-  },
-  {
-    id: 8,
-    name: 'The Vegan Table',
-    rating: 4.6,
-    reviews: 193,
-    address: '510 Castro St, San Francisco, CA',
-    coords: '37.7609, -122.4350',
-    tags: ['Vegan', 'Healthy'],
-    open: true,
-    image: 'https://images.unsplash.com/photo-1512621776951-a57141f2eefd?w=300&h=200&fit=crop'
-  },
-])
+const restaurants = ref([])
 
-function handleSearch() {
+function formatAddress(location) {
+  return location?.display_address?.join(', ') || 'Address not available'
+}
+
+function handleImageError(e) {
+  e.target.src = 'https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=300&h=200&fit=crop'
+}
+
+async function handleSearch() {
   if (!city.value.trim()) return
+
+  loading.value = true
+  error.value = null
   searchedCity.value = city.value
-  searched.value = true
+
+  try {
+    const API_KEY = 'vetG740Hv4K0q4dEn7EdyYpo3wUaBK8X0pflSLru89Go19FdAB5ggG84qwJJwaM-5UrLVhnHY_iNKY9FSGc97PUaZPYHa3NVvDFpTx953w3qtjIEOQy5WuCuUSfUaXYx'
+    const CORS_PROXY = 'https://corsproxy.io/?'
+    
+    const response = await fetch(
+      CORS_PROXY + encodeURIComponent(`https://api.yelp.com/v3/businesses/search?term=restaurants&location=${encodeURIComponent(city.value)}&limit=8`),
+      {
+        headers: {
+          Authorization: `Bearer ${API_KEY}`,
+        },
+      }
+    )
+    const data = await response.json()
+
+    if (data.error) {
+      error.value = data.error.description || 'Something went wrong'
+      return
+    }
+
+    restaurants.value = data.businesses || []
+
+    if (restaurants.value.length === 0) {
+      error.value = 'No restaurants found for this city. Try another city!'
+    }
+  } catch (err) {
+    error.value = 'Failed to fetch restaurants. Please try again.'
+  } finally {
+    loading.value = false
+  }
 }
 </script>
 
@@ -257,6 +240,7 @@ function handleSearch() {
 }
 
 .search-btn:hover { background: #c04d25; }
+.search-btn:disabled { background: #aaa; cursor: not-allowed; }
 
 .stats-row {
   display: flex;
@@ -283,6 +267,42 @@ function handleSearch() {
   padding: 1.5rem 1.25rem;
   max-width: 1200px;
   margin: 0 auto;
+}
+
+.loading-state {
+  text-align: center;
+  padding: 4rem 1rem;
+}
+
+.spinner {
+  width: 40px;
+  height: 40px;
+  border: 3px solid #eee;
+  border-top-color: #D85A30;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+  margin: 0 auto 1rem;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.error-state {
+  text-align: center;
+  padding: 4rem 1rem;
+  color: #a32d2d;
+}
+
+.retry-btn {
+  margin-top: 1rem;
+  background: #D85A30;
+  color: #fff;
+  border: none;
+  padding: 0.6rem 1.5rem;
+  border-radius: 50px;
+  cursor: pointer;
+  font-size: 14px;
 }
 
 .results-header {
@@ -342,9 +362,7 @@ function handleSearch() {
   transition: transform 0.3s;
 }
 
-.card:hover .card-image img {
-  transform: scale(1.05);
-}
+.card:hover .card-image img { transform: scale(1.05); }
 
 .card-rank {
   position: absolute;
@@ -429,29 +447,35 @@ function handleSearch() {
   font-weight: 500;
 }
 
-.card-open.open {
-  background: #edfaf0;
-  color: #1a7a3c;
-}
-
-.card-open.closed {
-  background: #faeaea;
-  color: #a32d2d;
-}
+.card-open.open { background: #edfaf0; color: #1a7a3c; }
+.card-open.closed { background: #faeaea; color: #a32d2d; }
 
 @media (max-width: 1024px) {
-  .cards-grid {
-    grid-template-columns: repeat(2, 1fr);
-  }
+  .cards-grid { grid-template-columns: repeat(2, 1fr); }
 }
 
 @media (max-width: 600px) {
-  .cards-grid {
-    grid-template-columns: 1fr;
-  }
+  .cards-grid { grid-template-columns: 1fr; }
+  .hero-title { font-size: 1.8rem; }
+}
 
-  .hero-title {
-    font-size: 1.8rem;
-  }
+.empty-state {
+  text-align: center;
+  padding: 4rem 1rem;
+}
+
+.empty-icon {
+  font-size: 3rem;
+  margin-bottom: 1rem;
+}
+
+.empty-state h3 {
+  font-size: 1.2rem;
+  color: #1a1a2e;
+  margin-bottom: 0.5rem;
+}
+
+.empty-state p {
+  color: #888;
 }
 </style>
