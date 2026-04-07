@@ -40,6 +40,7 @@
             <span class="city-name">{{ searchedCity }}</span>
             <span class="results-count">{{ currentPage }} of {{ totalPages }} pages</span>
           </div>
+          <RadiusToggle v-model="useRadius" />
         </div>
 
         <RestaurantGrid :restaurants="paginatedRestaurants" @select="openModal" />
@@ -99,6 +100,7 @@ import SkeletonGrid from './components/grid/SkeletonGrid.vue'
 import EmptyState from './components/states/EmptyState.vue'
 import ErrorState from './components/states/ErrorState.vue'
 import RestaurantModal from './components/modal/RestaurantModal.vue'
+import RadiusToggle from './components/RadiusToggle.vue'
 
 useTheme().init()
 
@@ -108,6 +110,7 @@ const { restaurants, loading, error, searchedCity, loadRandomCity, searchCity } 
 const currentPage = ref(1)
 const isModalOpen = ref(false)
 const selectedRestaurant = ref(null)
+const useRadius = ref(true)
 
 const totalCount = computed(() => restaurants.value.length)
 const totalPages = computed(() => Math.ceil(restaurants.value.length / ITEMS_PER_PAGE) || 1)
@@ -174,7 +177,7 @@ function handleCitySearch(city) {
   if (!city?.trim()) return
   lastSearchedCity = city
   currentPage.value = 1
-  searchCity(city)
+  searchCity(city, useRadius.value)
 }
 
 onMounted(() => {
@@ -295,6 +298,15 @@ onMounted(() => {
 .results-title {
   display: flex;
   align-items: center;
+  gap: 1rem;
+}
+
+.results-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2rem;
+  flex-wrap: wrap;
   gap: 1rem;
 }
 

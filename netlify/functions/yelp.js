@@ -1,5 +1,6 @@
 exports.handler = async (event) => {
   const city = event.queryStringParameters.city
+  const useRadius = event.queryStringParameters.radius !== 'false'
 
   if (!city) {
     return {
@@ -17,9 +18,11 @@ exports.handler = async (event) => {
     }
   }
 
+  const radius = useRadius ? '&radius=8046' : ''
+
   try {
     const response = await fetch(
-      `https://api.yelp.com/v3/businesses/search?term=restaurants&location=${encodeURIComponent(city)}&limit=50`,
+      `https://api.yelp.com/v3/businesses/search?term=restaurants&location=${encodeURIComponent(city)}${radius}&limit=50`,
       {
         headers: {
           Authorization: `Bearer ${API_KEY}`,

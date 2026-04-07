@@ -10,16 +10,17 @@ export function useYelp() {
 
   const defaultCities = ['San Francisco', 'New York', 'Los Angeles', 'Chicago', 'Miami', 'Seattle', 'Austin', 'Boston', 'Denver', 'Portland']
 
-async function fetchRestaurants(cityName) {
+async function fetchRestaurants(cityName, limitRadius = true) {
     loading.value = true
     error.value = null
 
     try {
       let data
+      const radius = limitRadius ? '&radius=8046' : ''
 
       if (import.meta.env.DEV) {
         const response = await fetch(
-          import.meta.env.VITE_CORS_PROXY + encodeURIComponent(`${API_URL}?term=restaurants&location=${encodeURIComponent(cityName)}&limit=50`),
+          import.meta.env.VITE_CORS_PROXY + encodeURIComponent(`${API_URL}?term=restaurants&location=${encodeURIComponent(cityName)}${radius}&limit=50`),
           {
             headers: {
               Authorization: `Bearer ${import.meta.env.VITE_YELP_API_KEY}`,
@@ -29,7 +30,7 @@ async function fetchRestaurants(cityName) {
         const proxied = await response.json()
         data = proxied.contents ? JSON.parse(proxied.contents) : proxied
       } else {
-        const response = await fetch(`/api/yelp?city=${encodeURIComponent(cityName)}`)
+        const response = await fetch(`/api/yelp?city=${encodeURIComponent(cityName)}&radius=${limitRadius ? 'true' : 'false'}`)
         data = await response.json()
       }
 
@@ -58,13 +59,13 @@ async function fetchRestaurants(cityName) {
   function loadRandomCity() {
     const randomCity = defaultCities[Math.floor(Math.random() * defaultCities.length)]
     searchedCity.value = randomCity
-    fetchRestaurants(randomCity)
+    fetchRestaurants(randomCity, true)
   }
 
-  function searchCity(cityName) {
+  function searchCity(cityName, limitRadius = true) {
     if (!cityName?.trim()) return
     searchedCity.value = cityName
-    fetchRestaurants(cityName)
+    fetchRestaurants(cityName, limitRadius)
   }
 
   return {
