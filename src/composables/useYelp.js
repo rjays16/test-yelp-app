@@ -16,7 +16,7 @@ export function useYelp() {
 
     try {
       const response = await fetch(
-        import.meta.env.VITE_CORS_PROXY + encodeURIComponent(`${API_URL}?term=restaurants&location=${encodeURIComponent(cityName)}&limit=8`),
+        import.meta.env.VITE_CORS_PROXY + encodeURIComponent(`${API_URL}?term=restaurants&location=${encodeURIComponent(cityName)}&limit=50`),
         {
           headers: {
             Authorization: `Bearer ${import.meta.env.VITE_YELP_API_KEY}`,

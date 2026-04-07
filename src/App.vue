@@ -11,16 +11,16 @@
 
       <div class="hero-stats">
         <div class="stat">
-          <span class="stat-value">{{ restaurants.length }}</span>
-          <span class="stat-label">Restaurants</span>
+          <span class="stat-value">{{ totalCount }}</span>
+          <span class="stat-label">Found</span>
         </div>
         <div class="stat">
-          <span class="stat-value">5 mi</span>
-          <span class="stat-label">Radius</span>
+          <span class="stat-value">{{ searchedCity }}</span>
+          <span class="stat-label">City</span>
         </div>
         <div class="stat">
-          <span class="stat-value">Yelp</span>
-          <span class="stat-label">Data Source</span>
+          <span class="stat-value">{{ totalPages }}</span>
+          <span class="stat-label">Pages</span>
         </div>
       </div>
     </header>
@@ -36,11 +36,41 @@
         <div class="results-header">
           <div class="results-title">
             <span class="city-name">{{ searchedCity }}</span>
-            <span class="results-count">{{ restaurants.length }} places found</span>
+            <span class="results-count">{{ currentPage }} of {{ totalPages }} pages</span>
           </div>
         </div>
 
-        <RestaurantGrid :restaurants="restaurants" />
+        <RestaurantGrid :restaurants="paginatedRestaurants" />
+
+        <div v-if="totalPages > 1" class="pagination">
+          <button 
+            class="page-btn" 
+            :disabled="currentPage === 1" 
+            @click="prevPage"
+          >
+            Previous
+          </button>
+          
+          <div class="page-numbers">
+            <button 
+              v-for="page in visiblePages" 
+              :key="page"
+              class="page-num"
+              :class="{ active: page === currentPage }"
+              @click="goToPage(page)"
+            >
+              {{ page }}
+            </button>
+          </div>
+
+          <button 
+            class="page-btn" 
+            :disabled="currentPage === totalPages" 
+            @click="nextPage"
+          >
+            Next
+          </button>
+        </div>
       </div>
     </main>
 
@@ -49,7 +79,7 @@
 </template>
 
 <script setup>
-import { onMounted } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { useYelp } from './composables/useYelp'
 import SearchBar from './components/SearchBar.vue'
 import RestaurantCard from './components/RestaurantCard.vue'
@@ -59,7 +89,58 @@ import ErrorState from './components/ErrorState.vue'
 import EmptyState from './components/EmptyState.vue'
 import Footer from './components/Footer.vue'
 
+const ITEMS_PER_PAGE = 8
+
 const { restaurants, loading, error, searchedCity, loadRandomCity, searchCity } = useYelp()
+const currentPage = ref(1)
+
+const totalCount = computed(() => restaurants.value.length)
+const totalPages = computed(() => Math.ceil(restaurants.value.length / ITEMS_PER_PAGE) || 1)
+
+const paginatedRestaurants = computed(() => {
+  const start = (currentPage.value - 1) * ITEMS_PER_PAGE
+  const end = start + ITEMS_PER_PAGE
+  return restaurants.value.slice(start, end)
+})
+
+const visiblePages = computed(() => {
+  const pages = []
+  const total = totalPages.value
+  const current = currentPage.value
+  
+  if (total <= 5) {
+    for (let i = 1; i <= total; i++) pages.push(i)
+  } else {
+    if (current <= 3) {
+      for (let i = 1; i <= 4; i++) pages.push(i)
+      pages.push('...')
+      pages.push(total)
+    } else if (current >= total - 2) {
+      pages.push(1)
+      pages.push('...')
+      for (let i = total - 3; i <= total; i++) pages.push(i)
+    } else {
+      pages.push(1)
+      pages.push('...')
+      for (let i = current - 1; i <= current + 1; i++) pages.push(i)
+      pages.push('...')
+      pages.push(total)
+    }
+  }
+  return pages
+})
+
+function prevPage() {
+  if (currentPage.value > 1) currentPage.value--
+}
+
+function nextPage() {
+  if (currentPage.value < totalPages.value) currentPage.value++
+}
+
+function goToPage(page) {
+  if (page !== '...') currentPage.value = page
+}
 
 let lastSearchedCity = ''
 
@@ -71,6 +152,7 @@ function retrySearch() {
 
 function handleSearch(city) {
   lastSearchedCity = city
+  currentPage.value = 1
   searchCity(city)
 }
 
@@ -206,6 +288,66 @@ onMounted(() => {
   background: #f0f0f0;
   padding: 6px 14px;
   border-radius: 20px;
+}
+
+.pagination {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
+  margin-top: 3rem;
+}
+
+.page-btn {
+  background: #fff;
+  border: 1px solid #ddd;
+  padding: 10px 20px;
+  border-radius: 30px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  color: #555;
+  transition: all 0.2s;
+}
+
+.page-btn:hover:not(:disabled) {
+  background: #D85A30;
+  border-color: #D85A30;
+  color: #fff;
+}
+
+.page-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.page-numbers {
+  display: flex;
+  gap: 6px;
+}
+
+.page-num {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  border: 1px solid #ddd;
+  background: #fff;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  color: #555;
+  transition: all 0.2s;
+}
+
+.page-num:hover {
+  border-color: #D85A30;
+  color: #D85A30;
+}
+
+.page-num.active {
+  background: #D85A30;
+  border-color: #D85A30;
+  color: #fff;
 }
 
 @media (max-width: 600px) {
