@@ -93,13 +93,12 @@ import { useTheme } from './composables/useTheme'
 import ThemeToggle from './components/ThemeToggle.vue'
 import SearchBar from './components/SearchBar.vue'
 import RestaurantCard from './components/RestaurantCard.vue'
-import RestaurantGrid from './components/RestaurantGrid.vue'
-import LoadingState from './components/LoadingState.vue'
-import SkeletonGrid from './components/SkeletonGrid.vue'
-import ErrorState from './components/ErrorState.vue'
-import EmptyState from './components/EmptyState.vue'
 import Footer from './components/Footer.vue'
-import RestaurantModal from './components/RestaurantModal.vue'
+import RestaurantGrid from './components/grid/RestaurantGrid.vue'
+import SkeletonGrid from './components/grid/SkeletonGrid.vue'
+import EmptyState from './components/states/EmptyState.vue'
+import ErrorState from './components/states/ErrorState.vue'
+import RestaurantModal from './components/modal/RestaurantModal.vue'
 
 useTheme().init()
 

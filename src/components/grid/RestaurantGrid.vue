@@ -11,7 +11,7 @@
 </template>
 
 <script setup>
-import RestaurantCard from './RestaurantCard.vue'
+import RestaurantCard from '../RestaurantCard.vue'
 
 defineProps({
   restaurants: Array,
