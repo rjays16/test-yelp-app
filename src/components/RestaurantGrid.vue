@@ -5,6 +5,7 @@
       :key="restaurant.id"
       :restaurant="restaurant"
       :index="index"
+      @click="$emit('select', restaurant)"
     />
   </div>
 </template>
@@ -15,6 +16,8 @@ import RestaurantCard from './RestaurantCard.vue'
 defineProps({
   restaurants: Array,
 })
+
+defineEmits(['select'])
 </script>
 
 <style scoped>

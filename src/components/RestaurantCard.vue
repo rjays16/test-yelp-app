@@ -1,5 +1,5 @@
 <template>
-  <div class="card">
+  <div class="card" @click="$emit('click')">
     <div class="card-image">
       <img
         :src="restaurant.image_url || fallbackImage"
@@ -44,6 +44,8 @@ defineProps({
   index: Number,
 })
 
+defineEmits(['click'])
+
 const fallbackImage = 'https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=600&h=400&fit=crop'
 
 function formatAddress(location) {
@@ -62,6 +64,7 @@ function handleImageError(e) {
   overflow: hidden;
   box-shadow: 0 2px 20px rgba(0, 0, 0, 0.06);
   transition: transform 0.3s, box-shadow 0.3s;
+  cursor: pointer;
 }
 
 .card:hover {

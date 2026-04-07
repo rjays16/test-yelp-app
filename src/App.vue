@@ -40,7 +40,7 @@
           </div>
         </div>
 
-        <RestaurantGrid :restaurants="paginatedRestaurants" />
+        <RestaurantGrid :restaurants="paginatedRestaurants" @select="openModal" />
 
         <div v-if="totalPages > 1" class="pagination">
           <button 
@@ -75,6 +75,12 @@
     </main>
 
     <Footer />
+
+    <RestaurantModal 
+      :isOpen="isModalOpen" 
+      :restaurant="selectedRestaurant"
+      @close="isModalOpen = false"
+    />
   </div>
 </template>
 
@@ -88,11 +94,14 @@ import LoadingState from './components/LoadingState.vue'
 import ErrorState from './components/ErrorState.vue'
 import EmptyState from './components/EmptyState.vue'
 import Footer from './components/Footer.vue'
+import RestaurantModal from './components/RestaurantModal.vue'
 
 const ITEMS_PER_PAGE = 8
 
 const { restaurants, loading, error, searchedCity, loadRandomCity, searchCity } = useYelp()
 const currentPage = ref(1)
+const isModalOpen = ref(false)
+const selectedRestaurant = ref(null)
 
 const totalCount = computed(() => restaurants.value.length)
 const totalPages = computed(() => Math.ceil(restaurants.value.length / ITEMS_PER_PAGE) || 1)
@@ -140,6 +149,11 @@ function nextPage() {
 
 function goToPage(page) {
   if (page !== '...') currentPage.value = page
+}
+
+function openModal(restaurant) {
+  selectedRestaurant.value = restaurant
+  isModalOpen.value = true
 }
 
 let lastSearchedCity = ''
